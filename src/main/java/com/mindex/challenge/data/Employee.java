@@ -8,10 +8,19 @@ public class Employee {
     private String lastName;
     private String position;
     private String department;
+    private boolean isManager = false;
     private List<Employee> directReports;
+
+
+
+
 
     public Employee() {
     }
+
+    public boolean isManager() {return isManager;}
+
+    public void setManager(boolean manager) {isManager = manager;}
 
     public String getEmployeeId() {
         return employeeId;
@@ -53,7 +62,7 @@ public class Employee {
         this.department = department;
     }
 
-    public List<Employee> getDirectReports() {
+     public List<Employee> getDirectReports() {
         return directReports;
     }
 
