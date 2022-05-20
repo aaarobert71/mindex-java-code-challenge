@@ -45,17 +45,9 @@ public class EmployeeController {
     }
 
     @PostMapping("/compensation")
-    public Compensation createCompensation(@RequestBody Employee employee, @RequestParam String salary, @RequestParam Date effectiveDate) {
+    public Compensation createCompensation(@RequestBody Employee employee, @RequestParam String salary, @RequestParam String effectiveDate) {
         LOG.debug("Received request for employee compensation creation [{}]", employee);
-       Compensation newCompensation = null;
-       Employee employeeExist = employeeService.read(employee.getEmployeeId());
-        if (employeeExist != null) {
-            newCompensation = new Compensation(employeeExist, salary, effectiveDate);
-        }
-        else {
-            newCompensation = new Compensation(employeeService.create(employee), salary, effectiveDate);
-        }
-        return employeeService.createCompensation(newCompensation);
+        return employeeService.createCompensation(employee, salary, effectiveDate);
     }
     @GetMapping("/compensation/{id}")
     public Compensation readCompensation(@PathVariable String id) {

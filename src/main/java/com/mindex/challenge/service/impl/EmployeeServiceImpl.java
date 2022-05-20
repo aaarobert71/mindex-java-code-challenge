@@ -11,7 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -25,7 +27,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public Employee create(Employee employee) {
         LOG.debug("Creating employee [{}]", employee);
-        //employee.setEmployeeId(UUID.randomUUID().toString());
+        employee.setEmployeeId(UUID.randomUUID().toString());
         employeeRepository.insert(employee);
         return employee;
     }
@@ -51,8 +53,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (employee != null) {
             List<Employee> reportsList = employee.getDirectReports();
             org = new ReportingStructure();
-            if (reportsList.size() > 0)
-                employee.setManager(true);
             org.setManager(employee.getFirstName(), employee.getLastName());
             setEmployees(org.getDirectReports(), reportsList);
             org.setNumberOfReports(getNumberOfDirectReports(reportsList));
@@ -63,11 +63,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     // Using recursion to get a given employee direct reports
     private void setEmployees(List<Employee> employees, List<Employee> reports) {
         if (reports != null)for (Employee report : reports) {
-            if (report != null && report.getDirectReports() != null && report.getDirectReports().size() > 0)
-                report.setManager(true);
-
-            employees.add(report);
-            setEmployees(employees, report.getDirectReports());
+            Employee employee = employeeRepository.findByEmployeeId(report.getEmployeeId());
+            employees.add(employee);
+            setEmployees(employees, employee.getDirectReports());
         }
     }
 
@@ -75,7 +73,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     private int getNumberOfDirectReports(List<Employee> reports) {
         int count = 0;
         if (reports != null)for (Employee report : reports) {
-            count += 1 + getNumberOfDirectReports(report.getDirectReports());
+            Employee employee = employeeRepository.findByEmployeeId(report.getEmployeeId());
+            count += 1 + getNumberOfDirectReports(employee.getDirectReports());
         }
         return count;
     }
@@ -87,10 +86,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public Compensation createCompensation (Compensation comp) {
-        LOG.debug("Creation of Compensation for employee ID [{}] ", comp.getEmployee().getEmployeeId());
-        compensationRepository.save(comp);
-        return comp;
+    public Compensation createCompensation (Employee employee, String salary, String effectiveDate) {
+        LOG.debug("Creation of Compensation for employee ID [{}] ", employee.getEmployeeId());
+        return compensationRepository.save(new Compensation(employee, salary, effectiveDate));
     }
 
 
